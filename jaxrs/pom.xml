@@ -1,0 +1,26 @@
+<project>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.codeleaf.service</groupId>
+        <artifactId>service</artifactId>
+        <version>0.1.0</version>
+    </parent>
+
+    <artifactId>svc-jaxrs</artifactId>
+
+    <name>Service :: JAX-RS</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>svc-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>${jaxrs.version}</version>
+        </dependency>
+    </dependencies>
+</project>
