@@ -1,24 +1,16 @@
 package io.codeleaf.service.engines.jaxrs;
 
-import io.codeleaf.common.behaviors.Identification;
-import io.codeleaf.common.behaviors.impl.DefaultIdentification;
-import io.codeleaf.service.ServiceEndpoint;
-import io.codeleaf.service.ServiceException;
-import io.codeleaf.service.http.impl.DefaultHttpEndpoint;
-import io.codeleaf.service.jaxrs.JaxrsService;
-import org.junit.jupiter.api.AfterEach;
+import io.codeleaf.service.ServiceEngine;
+import io.codeleaf.service.jaxrs.DefaultJaxrsService;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Application;
-import java.util.Collections;
-import java.util.List;
+import java.io.IOException;
 import java.util.Set;
-import java.util.UUID;
 
 public class JaxrsTest {
 
@@ -38,60 +30,23 @@ public class JaxrsTest {
 
     public static final class MyJaxrsApplication extends Application {
 
-        private final Set<Object> singletons = Collections.singleton(new MyJaxrsResource());
-
-        public Set<Object> getSingletons() {
-            return singletons;
+        public Set<Class<?>> getClasses() {
+            return Set.of(MyJaxrsResource.class);
         }
-
-    }
-
-    public static final class MyJaxrsService implements JaxrsService {
-
-        private final Application application = new MyJaxrsApplication();
-
-        @Override
-        public Identification getId() {
-            return new DefaultIdentification(() -> "myName", null, UUID.randomUUID());
-        }
-
-        @Override
-        public List<ServiceEndpoint> getEndpoints() {
-            return List.of(DefaultHttpEndpoint.create("localhost", 8181, Collections.singletonList("testPath")));
-        }
-
-        @Override
-        public Application getApplication() {
-            return application;
-        }
-    }
-
-    private JaxrsServiceEngine engine;
-
-    @BeforeEach
-    public void before() throws ServiceException {
-        engine = JaxrsServiceEngine.create();
-        engine.init();
-        engine.start();
-    }
-
-    @AfterEach
-    public void after() throws ServiceException {
-        engine.stop();
-        engine.destroy();
-        engine = null;
     }
 
     @Test
-    public void test() throws ServiceException {
+    public void test() throws IOException, InterruptedException {
         // Given
-        engine.getServiceOperator().deploy(new MyJaxrsService());
+        DefaultJaxrsService jaxrsService = DefaultJaxrsService.create(new MyJaxrsApplication());
+        try (ServiceEngine ignored = JaxrsServiceEngine.run(jaxrsService)) {
 
-        // When
-        String result = ClientBuilder.newClient().target("http://localhost:8181/testPath").path("hello").request().get(String.class);
+            // When
+            String result = ClientBuilder.newClient().target(jaxrsService.getHttpEndpoint().toHostURI()).path("hello").request().get(String.class);
 
-        // Then
-        Assertions.assertEquals("Hello World!", result);
+            // Then
+            Assertions.assertEquals("Hello World!", result);
+        }
     }
 
 }
