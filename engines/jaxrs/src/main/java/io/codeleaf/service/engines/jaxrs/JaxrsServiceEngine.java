@@ -12,6 +12,7 @@ import org.apache.camel.impl.SimpleRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.*;
 
 public final class JaxrsServiceEngine implements ServiceEngine {
@@ -162,6 +163,18 @@ public final class JaxrsServiceEngine implements ServiceEngine {
     public static JaxrsServiceEngine create() {
         SimpleRegistry beanRegistry = new SimpleRegistry();
         return new JaxrsServiceEngine(new DefaultCamelContext(beanRegistry), beanRegistry);
+    }
+
+    public static JaxrsServiceEngine run(JaxrsService service) throws IOException {
+        try {
+            JaxrsServiceEngine engine = JaxrsServiceEngine.create();
+            engine.init();
+            engine.getServiceOperator().deploy(service);
+            engine.start();
+            return engine;
+        } catch (ServiceException cause) {
+            throw new IOException("Failed to run service: " + cause, cause);
+        }
     }
 
     public final class ServiceOperatorImpl implements ServiceOperator {

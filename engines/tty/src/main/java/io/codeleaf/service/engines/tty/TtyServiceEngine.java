@@ -105,6 +105,18 @@ public final class TtyServiceEngine implements ServiceEngine {
         }
     }
 
+    public static TtyServiceEngine run(TtyService service) throws IOException {
+        try {
+            TtyServiceEngine engine = new TtyServiceEngine();
+            engine.init();
+            engine.getServiceOperator().deploy(service);
+            engine.start();
+            return engine;
+        } catch (ServiceException cause) {
+            throw new IOException("Failed to run service: " + cause, cause);
+        }
+    }
+
     public final class ServiceOperatorImpl implements ServiceOperator {
 
         @Override

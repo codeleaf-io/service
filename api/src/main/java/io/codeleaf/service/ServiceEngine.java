@@ -1,8 +1,10 @@
 package io.codeleaf.service;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.List;
 
-public interface ServiceEngine {
+public interface ServiceEngine extends Closeable {
 
     void init() throws ServiceException;
 
@@ -22,4 +24,13 @@ public interface ServiceEngine {
         return getSupportedServiceTypes().contains(serviceType);
     }
 
+    @Override
+    default void close() throws IOException {
+        try {
+            stop();
+            destroy();
+        } catch (ServiceException cause) {
+            throw new IOException("Failed to close service engine: " + cause, cause);
+        }
+    }
 }

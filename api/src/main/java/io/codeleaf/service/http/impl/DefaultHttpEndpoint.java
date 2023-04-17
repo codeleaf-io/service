@@ -2,6 +2,8 @@ package io.codeleaf.service.http.impl;
 
 import io.codeleaf.service.http.HttpEndpoint;
 
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,6 +35,18 @@ public class DefaultHttpEndpoint implements HttpEndpoint {
 
     public List<String> getBasePath() {
         return basePath;
+    }
+
+    public static DefaultHttpEndpoint create() throws IllegalStateException {
+        return create("localhost", findFreePort());
+    }
+
+    private static int findFreePort() {
+        try (ServerSocket serverSocket = new ServerSocket(0)) {
+            return serverSocket.getLocalPort();
+        } catch (IOException cause) {
+            throw new IllegalStateException("No free port available: " + cause, cause);
+        }
     }
 
     public static DefaultHttpEndpoint create(String host, int portNumber) {

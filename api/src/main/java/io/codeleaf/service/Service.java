@@ -2,7 +2,6 @@ package io.codeleaf.service;
 
 import io.codeleaf.common.behaviors.Identification;
 
-import java.util.Collection;
 import java.util.List;
 
 public interface Service {
