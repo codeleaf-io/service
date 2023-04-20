@@ -18,9 +18,19 @@
             <artifactId>svc-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.codeleaf.common</groupId>
+            <artifactId>common-utils</artifactId>
+            <version>${leaf-common.version}</version>
+        </dependency>
+        <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
             <version>${jaxrs.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.codeleaf.common</groupId>
+            <artifactId>common-libs-inject</artifactId>
+            <version>${leaf-common.version}</version>
         </dependency>
     </dependencies>
 </project>

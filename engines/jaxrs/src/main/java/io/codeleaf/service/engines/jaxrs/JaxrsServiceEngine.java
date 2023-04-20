@@ -8,8 +8,6 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.Route;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
-import org.apache.camel.spi.Registry;
-import org.apache.camel.support.DefaultRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,21 +19,18 @@ public final class JaxrsServiceEngine implements ServiceEngine {
     private static final Logger LOG = LoggerFactory.getLogger(JaxrsServiceEngine.class);
 
     private final CamelContext camelContext;
-    private final Registry registry;
     private final Map<HttpListenRouteBuilder, Set<Identification>> listenRouteMapping = new HashMap<>();
     private final Map<Identification, JaxrsService> services = new HashMap<>();
     private final Set<EndpointHandler> handlers = new LinkedHashSet<>();
     private final EndpointRouter router = new EndpointRouter(new EndpointMatcher(handlers));
     private final ServiceOperator operator = new ServiceOperatorImpl();
 
-    JaxrsServiceEngine(CamelContext camelContext, Registry registry) {
+    JaxrsServiceEngine(CamelContext camelContext) {
         this.camelContext = camelContext;
-        this.registry = registry;
     }
 
     public static JaxrsServiceEngine create() {
-        Registry registry = new DefaultRegistry();
-        return new JaxrsServiceEngine(new DefaultCamelContext(registry), registry);
+        return new JaxrsServiceEngine(new DefaultCamelContext());
     }
 
     public static JaxrsServiceEngine run(JaxrsService service) throws IOException {
@@ -53,7 +48,7 @@ public final class JaxrsServiceEngine implements ServiceEngine {
     @Override
     public void init() throws ServiceException {
         try {
-            registry.bind("httpBinding", new HttpResponseAlreadyWrittenBinding());
+            camelContext.getRegistry().bind("httpBinding", new HttpResponseAlreadyWrittenBinding());
             LOG.info("Engine initialized");
         } catch (Exception cause) {
             LOG.error("Failed to initialize engine: " + cause.getMessage(), cause);
