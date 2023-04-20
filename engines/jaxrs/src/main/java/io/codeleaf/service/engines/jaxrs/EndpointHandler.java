@@ -32,6 +32,20 @@ public final class EndpointHandler implements Processor {
         this.servlet = servlet;
     }
 
+    public static EndpointHandler create(JaxrsService service, HttpEndpoint serviceEndpoint) throws ServiceException {
+        try {
+            ServletContainer container = new ServletContainer(ResourceConfig.forApplication(service.getApplication()));
+            container.init(new ServiceServletConfig(service, serviceEndpoint));
+            return new EndpointHandler(service, serviceEndpoint, container);
+        } catch (ServletException cause) {
+            throw new ServiceException("Failed to initialize service handler: " + cause.getMessage(), cause);
+        }
+    }
+
+    private static Enumeration<String> enumeration(String value) {
+        return Collections.enumeration(Collections.singleton(value));
+    }
+
     public JaxrsService getService() {
         return service;
     }
@@ -48,16 +62,6 @@ public final class EndpointHandler implements Processor {
         servlet.service(OperatorServletRequest.create(request, exchange.getIn(), contextPath), response);
     }
 
-    public static EndpointHandler create(JaxrsService service, HttpEndpoint serviceEndpoint) throws ServiceException {
-        try {
-            ServletContainer container = new ServletContainer(ResourceConfig.forApplication(service.getApplication()));
-            container.init(new ServiceServletConfig(service, serviceEndpoint));
-            return new EndpointHandler(service, serviceEndpoint, container);
-        } catch (ServletException cause) {
-            throw new ServiceException("Failed to initialize service handler: " + cause.getMessage(), cause);
-        }
-    }
-
     private static final class OperatorServletRequest extends HttpServletRequestWrapper {
 
         private final Map<String, String> headers;
@@ -69,6 +73,15 @@ public final class EndpointHandler implements Processor {
             this.headers = headers;
             this.relativePath = relativePath;
             this.contextPath = contextPath;
+        }
+
+        private static OperatorServletRequest create(HttpServletRequest request, Message in, String contextPath) {
+            Map<String, String> operatorHeaders = new HashMap<>();
+            operatorHeaders.put(OperatorCamelHeaders.SERVICE_ID, Objects.toString(in.getHeader(OperatorCamelHeaders.SERVICE_ID)));
+            operatorHeaders.put(OperatorCamelHeaders.SERVICE_NAME, Objects.toString(in.getHeader(OperatorCamelHeaders.SERVICE_NAME)));
+            operatorHeaders.put(OperatorCamelHeaders.ORIGINAL_URL, Objects.toString(in.getHeader(OperatorCamelHeaders.ORIGINAL_URL)));
+            operatorHeaders.put(OperatorCamelHeaders.RELATIVE_PATH, Objects.toString(in.getHeader(OperatorCamelHeaders.RELATIVE_PATH)));
+            return new OperatorServletRequest(request, operatorHeaders, operatorHeaders.get(OperatorCamelHeaders.RELATIVE_PATH), contextPath);
         }
 
         @Override
@@ -85,7 +98,6 @@ public final class EndpointHandler implements Processor {
         public String getPathInfo() {
             return relativePath;
         }
-
 
         @Override
         public String getPathTranslated() {
@@ -106,15 +118,6 @@ public final class EndpointHandler implements Processor {
             }
             headerNames.addAll(headers.keySet());
             return headerNames.elements();
-        }
-
-        private static OperatorServletRequest create(HttpServletRequest request, Message in, String contextPath) {
-            Map<String, String> operatorHeaders = new HashMap<>();
-            operatorHeaders.put(OperatorCamelHeaders.SERVICE_ID, Objects.toString(in.getHeader(OperatorCamelHeaders.SERVICE_ID)));
-            operatorHeaders.put(OperatorCamelHeaders.SERVICE_NAME, Objects.toString(in.getHeader(OperatorCamelHeaders.SERVICE_NAME)));
-            operatorHeaders.put(OperatorCamelHeaders.ORIGINAL_URL, Objects.toString(in.getHeader(OperatorCamelHeaders.ORIGINAL_URL)));
-            operatorHeaders.put(OperatorCamelHeaders.RELATIVE_PATH, Objects.toString(in.getHeader(OperatorCamelHeaders.RELATIVE_PATH)));
-            return new OperatorServletRequest(request, operatorHeaders, operatorHeaders.get(OperatorCamelHeaders.RELATIVE_PATH), contextPath);
         }
     }
 
@@ -152,10 +155,6 @@ public final class EndpointHandler implements Processor {
             return Collections.emptyEnumeration();
         }
 
-    }
-
-    private static Enumeration<String> enumeration(String value) {
-        return Collections.enumeration(Collections.singleton(value));
     }
 
 }

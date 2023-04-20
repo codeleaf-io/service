@@ -17,6 +17,11 @@ public final class HttpListenRouteBuilder extends RouteBuilder {
         this.router = router;
     }
 
+    public static HttpListenRouteBuilder create(HttpEndpoint serviceEndpoint, EndpointRouter router) {
+        Objects.requireNonNull(serviceEndpoint);
+        return new HttpListenRouteBuilder(serviceEndpoint.getHost(), serviceEndpoint.getPortNumber(), router);
+    }
+
     public String getRouteId() {
         return "listen_" + ipAddress + ":" + portNumber;
     }
@@ -34,21 +39,15 @@ public final class HttpListenRouteBuilder extends RouteBuilder {
         if (this == object) {
             return true;
         }
-        if (!(object instanceof HttpListenRouteBuilder)) {
+        if (!(object instanceof HttpListenRouteBuilder other)) {
             return false;
         }
-        HttpListenRouteBuilder other = (HttpListenRouteBuilder) object;
         return ipAddress.equals(other.ipAddress) && portNumber == other.portNumber;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(ipAddress, portNumber);
-    }
-
-    public static HttpListenRouteBuilder create(HttpEndpoint serviceEndpoint, EndpointRouter router) {
-        Objects.requireNonNull(serviceEndpoint);
-        return new HttpListenRouteBuilder(serviceEndpoint.getHost(), serviceEndpoint.getPortNumber(), router);
     }
 
 }

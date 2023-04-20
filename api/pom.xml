@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.codeleaf.service</groupId>
         <artifactId>service</artifactId>
-        <version>0.1.0</version>
+        <version>0.9.0</version>
     </parent>
 
     <artifactId>svc-api</artifactId>
@@ -16,6 +16,7 @@
         <dependency>
             <groupId>io.codeleaf.common</groupId>
             <artifactId>common-behaviors</artifactId>
+            <version>${leaf-common.version}</version>
         </dependency>
     </dependencies>
 </project>

@@ -14,9 +14,9 @@ import java.util.Set;
 
 public class JaxrsTest {
 
-    static {
-        System.setProperty("java.util.logging.config.file", JaxrsTest.class.getClassLoader().getResource("logging.properties").getFile());
-    }
+//    static {
+//        System.setProperty("java.util.logging.config.file", JaxrsTest.class.getClassLoader().getResource("logging.properties").getFile());
+//    }
 
     @Path("/hello")
     public static final class MyJaxrsResource {
@@ -36,7 +36,7 @@ public class JaxrsTest {
     }
 
     @Test
-    public void test() throws IOException, InterruptedException {
+    public void test() throws IOException {
         // Given
         DefaultJaxrsService jaxrsService = DefaultJaxrsService.create(new MyJaxrsApplication());
         try (ServiceEngine ignored = JaxrsServiceEngine.run(jaxrsService)) {

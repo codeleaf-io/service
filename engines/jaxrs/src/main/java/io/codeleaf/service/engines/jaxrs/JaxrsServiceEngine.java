@@ -8,7 +8,8 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.Route;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
-import org.apache.camel.impl.SimpleRegistry;
+import org.apache.camel.spi.Registry;
+import org.apache.camel.support.DefaultRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,22 +21,39 @@ public final class JaxrsServiceEngine implements ServiceEngine {
     private static final Logger LOG = LoggerFactory.getLogger(JaxrsServiceEngine.class);
 
     private final CamelContext camelContext;
-    private final Map<String, Object> beanRegistry;
+    private final Registry registry;
     private final Map<HttpListenRouteBuilder, Set<Identification>> listenRouteMapping = new HashMap<>();
     private final Map<Identification, JaxrsService> services = new HashMap<>();
     private final Set<EndpointHandler> handlers = new LinkedHashSet<>();
     private final EndpointRouter router = new EndpointRouter(new EndpointMatcher(handlers));
     private final ServiceOperator operator = new ServiceOperatorImpl();
 
-    JaxrsServiceEngine(CamelContext camelContext, Map<String, Object> beanRegistry) {
+    JaxrsServiceEngine(CamelContext camelContext, Registry registry) {
         this.camelContext = camelContext;
-        this.beanRegistry = beanRegistry;
+        this.registry = registry;
+    }
+
+    public static JaxrsServiceEngine create() {
+        Registry registry = new DefaultRegistry();
+        return new JaxrsServiceEngine(new DefaultCamelContext(registry), registry);
+    }
+
+    public static JaxrsServiceEngine run(JaxrsService service) throws IOException {
+        try {
+            JaxrsServiceEngine engine = JaxrsServiceEngine.create();
+            engine.init();
+            engine.getServiceOperator().deploy(service);
+            engine.start();
+            return engine;
+        } catch (ServiceException cause) {
+            throw new IOException("Failed to run service: " + cause, cause);
+        }
     }
 
     @Override
     public void init() throws ServiceException {
         try {
-            beanRegistry.put("httpBinding", new HttpResponseAlreadyWrittenBinding());
+            registry.bind("httpBinding", new HttpResponseAlreadyWrittenBinding());
             LOG.info("Engine initialized");
         } catch (Exception cause) {
             LOG.error("Failed to initialize engine: " + cause.getMessage(), cause);
@@ -123,8 +141,7 @@ public final class JaxrsServiceEngine implements ServiceEngine {
             throw new ServiceException("Service already present, this can't add: " + service.getId());
         }
         for (ServiceEndpoint serviceEndpoint : service.getEndpoints()) {
-            if (serviceEndpoint instanceof HttpEndpoint) {
-                HttpEndpoint httpEndpoint = (HttpEndpoint) serviceEndpoint;
+            if (serviceEndpoint instanceof HttpEndpoint httpEndpoint) {
                 HttpListenRouteBuilder listenRoute = HttpListenRouteBuilder.create(httpEndpoint, router);
                 Set<Identification> serviceIds = listenRouteMapping.computeIfAbsent(listenRoute, k -> new HashSet<>());
                 if (serviceIds.isEmpty()) {
@@ -146,8 +163,7 @@ public final class JaxrsServiceEngine implements ServiceEngine {
             throw new ServiceException("Service NOT present, thus can't remove: " + service.getId());
         }
         for (ServiceEndpoint serviceEndpoint : service.getEndpoints()) {
-            if (serviceEndpoint instanceof HttpEndpoint) {
-                HttpEndpoint httpEndpoint = (HttpEndpoint) serviceEndpoint;
+            if (serviceEndpoint instanceof HttpEndpoint httpEndpoint) {
                 HttpListenRouteBuilder listenRoute = HttpListenRouteBuilder.create(httpEndpoint, router);
                 Set<Identification> applicationIdentifiers = listenRouteMapping.getOrDefault(listenRoute, Collections.emptySet());
                 if (applicationIdentifiers.remove(service.getId()) && applicationIdentifiers.isEmpty()) {
@@ -158,23 +174,6 @@ public final class JaxrsServiceEngine implements ServiceEngine {
         handlers.removeIf(handler -> Objects.equals(handler.getService().getId(), service.getId()));
         services.remove(service.getId());
         LOG.info("Removed service: " + service.getId());
-    }
-
-    public static JaxrsServiceEngine create() {
-        SimpleRegistry beanRegistry = new SimpleRegistry();
-        return new JaxrsServiceEngine(new DefaultCamelContext(beanRegistry), beanRegistry);
-    }
-
-    public static JaxrsServiceEngine run(JaxrsService service) throws IOException {
-        try {
-            JaxrsServiceEngine engine = JaxrsServiceEngine.create();
-            engine.init();
-            engine.getServiceOperator().deploy(service);
-            engine.start();
-            return engine;
-        } catch (ServiceException cause) {
-            throw new IOException("Failed to run service: " + cause, cause);
-        }
     }
 
     public final class ServiceOperatorImpl implements ServiceOperator {
