@@ -1,11 +1,11 @@
 package io.codeleaf.service.engines.tty;
 
+import io.codeleaf.service.tty.TtyService;
 import io.codeleaf.service.tty.impl.DefaultTtyService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Scanner;
 
 public class TtyTest {
@@ -13,16 +13,16 @@ public class TtyTest {
     @Test
     public void test() throws IOException {
         // Given
-        DefaultTtyService service = DefaultTtyService.create(t -> t.getOut().println("Hello World!"));
-        try (TtyServiceEngine engine = TtyServiceEngine.run(service)) {
-            InputStream stdout = ((DefaultTtyService) engine.listServices().get(0)).getStdout();
-            Scanner in = new Scanner(stdout);
+        TtyService service = DefaultTtyService.create(t -> t.getOut().println("Hello World!"));
 
-            // When
-            String result = in.nextLine();
+        // When
+        try (TtyServiceEngine result = TtyServiceEngine.run(service)) {
 
             // Then
-            Assertions.assertEquals("Hello World!", result);
+            Assertions.assertEquals(1, result.listServices().size());
+            Assertions.assertTrue(result.listServices().get(0) instanceof TtyService);
+            Scanner in = new Scanner(((TtyService) result.listServices().get(0)).getTtyEndpoint().getStdout());
+            Assertions.assertEquals("Hello World!", in.nextLine());
         }
     }
 

@@ -8,9 +8,9 @@
         <version>0.9.0</version>
     </parent>
 
-    <artifactId>svc-jaxrs</artifactId>
+    <artifactId>svc-websocket</artifactId>
 
-    <name>Service :: JAX-RS</name>
+    <name>Service :: WebSocket</name>
 
     <dependencies>
         <dependency>
@@ -18,9 +18,14 @@
             <artifactId>svc-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>javax.ws.rs-api</artifactId>
-            <version>${jaxrs.version}</version>
+            <groupId>io.codeleaf.common</groupId>
+            <artifactId>common-utils</artifactId>
+            <version>${leaf-common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.websocket</groupId>
+            <artifactId>javax.websocket-api</artifactId>
+            <version>${websocket.version}</version>
         </dependency>
         <dependency>
             <groupId>io.codeleaf.common</groupId>

@@ -18,5 +18,10 @@
             <artifactId>common-behaviors</artifactId>
             <version>${leaf-common.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.codeleaf.common</groupId>
+            <artifactId>common-utils</artifactId>
+            <version>${leaf-common.version}</version>
+        </dependency>
     </dependencies>
 </project>

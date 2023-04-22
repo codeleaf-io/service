@@ -1,17 +1,15 @@
 package io.codeleaf.service.tty.impl;
 
 import io.codeleaf.common.behaviors.Identification;
-import io.codeleaf.service.ServiceEndpoint;
+import io.codeleaf.common.utils.IdentityBuilder;
 import io.codeleaf.service.tty.TtyConnection;
 import io.codeleaf.service.tty.TtyEndpoint;
 import io.codeleaf.service.tty.TtyService;
-import io.codeleaf.service.utils.Identifications;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
+import java.net.URI;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class DefaultTtyService implements TtyService {
@@ -32,29 +30,22 @@ public class DefaultTtyService implements TtyService {
     }
 
     @Override
-    public List<? extends ServiceEndpoint> getEndpoints() {
-        return List.of(endpoint);
-    }
-
-    public OutputStream getStdin() {
-        return endpoint.getStdin();
-    }
-
-    public InputStream getStdout() {
-        return endpoint.getStdout();
-    }
-
-    public InputStream getStderr() {
-        return endpoint.getStdout();
-    }
-
-    @Override
     public void run(TtyConnection connection) {
         service.accept(connection);
     }
 
+    @Override
+    public TtyEndpoint getTtyEndpoint() {
+        return endpoint;
+    }
+
     public static DefaultTtyService create(Consumer<TtyConnection> service) throws IOException {
-        return create(Identifications.create(), service);
+        UUID uuid = UUID.randomUUID();
+        return create(new IdentityBuilder()
+                .withName(uuid.toString())
+                .withURI(URI.create("urn:tty:" + uuid))
+                .withInstanceId(uuid)
+                .build(), service);
     }
 
     public static DefaultTtyService create(Identification id, Consumer<TtyConnection> service) throws IOException {

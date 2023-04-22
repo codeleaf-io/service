@@ -1,13 +1,11 @@
 package io.codeleaf.service.jaxrs;
 
 import io.codeleaf.common.behaviors.Identification;
-import io.codeleaf.service.ServiceEndpoint;
-import io.codeleaf.service.http.HttpEndpoint;
-import io.codeleaf.service.http.impl.DefaultHttpEndpoint;
-import io.codeleaf.service.utils.Identifications;
+import io.codeleaf.common.utils.IdentityBuilder;
+import io.codeleaf.service.url.HttpEndpoint;
+import io.codeleaf.service.url.impl.DefaultHttpEndpoint;
 
 import javax.ws.rs.core.Application;
-import java.util.List;
 import java.util.Objects;
 
 public class DefaultJaxrsService implements JaxrsService {
@@ -17,15 +15,14 @@ public class DefaultJaxrsService implements JaxrsService {
     private final HttpEndpoint endpoint;
 
     public static DefaultJaxrsService create(Application application) {
-        return create(application, Identifications.create());
+        return create(application, DefaultHttpEndpoint.create());
     }
 
-    public static DefaultJaxrsService create(Application application, Identification id) {
-        return create(application, id, DefaultHttpEndpoint.create());
-    }
-
-    public static DefaultJaxrsService create(Application application, HttpEndpoint endpoint) {
-        return create(application, Identifications.create(), endpoint);
+    public static DefaultJaxrsService create(Application application, HttpEndpoint httpEndpoint) {
+        return create(application, new IdentityBuilder()
+                .withName(httpEndpoint.getVirtualHostString() + "/" + httpEndpoint.getBasePath())
+                .withURI(httpEndpoint.toURI())
+                .build(), httpEndpoint);
     }
 
     public static DefaultJaxrsService create(Application application, Identification id, HttpEndpoint endpoint) {
@@ -47,15 +44,11 @@ public class DefaultJaxrsService implements JaxrsService {
     }
 
     @Override
-    public List<? extends ServiceEndpoint> getEndpoints() {
-        return List.of(endpoint);
-    }
-
-    @Override
     public Application getApplication() {
         return application;
     }
 
+    @Override
     public HttpEndpoint getHttpEndpoint() {
         return endpoint;
     }

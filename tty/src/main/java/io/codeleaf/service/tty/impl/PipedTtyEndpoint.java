@@ -5,7 +5,7 @@ import io.codeleaf.service.tty.TtyEndpoint;
 
 import java.io.*;
 
-public class PipedTtyEndpoint implements TtyEndpoint {
+public final class PipedTtyEndpoint implements TtyEndpoint {
 
     private final PrintStream stdin;
     private final InputStream stdout;

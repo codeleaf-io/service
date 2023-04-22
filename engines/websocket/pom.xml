@@ -1,0 +1,46 @@
+<project>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.codeleaf.service</groupId>
+        <artifactId>service</artifactId>
+        <version>0.9.0</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>svc-engine-websocket</artifactId>
+
+    <name>Service :: Engines :: WebSocket</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>svc-websocket</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.codeleaf.common</groupId>
+            <artifactId>common-libs-logging</artifactId>
+            <version>${leaf-common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.tyrus</groupId>
+            <artifactId>tyrus-container-servlet</artifactId>
+            <version>${tyrus-container-servlet}</version>
+        </dependency>
+
+        <!-- test -->
+        <dependency>
+            <groupId>io.codeleaf.common</groupId>
+            <artifactId>common-libs-test</artifactId>
+            <version>${leaf-common.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.codeleaf.common</groupId>
+            <artifactId>common-libs-logging-impl</artifactId>
+            <version>${leaf-common.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

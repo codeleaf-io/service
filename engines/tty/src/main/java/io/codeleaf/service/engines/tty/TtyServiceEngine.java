@@ -1,7 +1,10 @@
 package io.codeleaf.service.engines.tty;
 
 import io.codeleaf.common.behaviors.Identification;
-import io.codeleaf.service.*;
+import io.codeleaf.service.Service;
+import io.codeleaf.service.ServiceEngine;
+import io.codeleaf.service.ServiceException;
+import io.codeleaf.service.ServiceOperator;
 import io.codeleaf.service.tty.TtyConnection;
 import io.codeleaf.service.tty.TtyEndpoint;
 import io.codeleaf.service.tty.TtyService;
@@ -64,13 +67,9 @@ public final class TtyServiceEngine implements ServiceEngine {
             LOG.error("Service already present, this can't add: " + service.getId());
             throw new ServiceException("Service already present, this can't add: " + service.getId());
         }
-        for (ServiceEndpoint serviceEndpoint : service.getEndpoints()) {
-            if (serviceEndpoint instanceof TtyEndpoint) {
-                TtyEndpoint ttyEndpoint = (TtyEndpoint) serviceEndpoint;
-                endpoints.computeIfAbsent(service.getId(), (id) -> new LinkedList<>()).add(ttyEndpoint);
-                executor.execute(new BridgeTtyService(service, createConnection(ttyEndpoint)));
-            }
-        }
+        TtyEndpoint ttyEndpoint = service.getTtyEndpoint();
+        endpoints.computeIfAbsent(service.getId(), (id) -> new LinkedList<>()).add(ttyEndpoint);
+        executor.execute(new BridgeTtyService(service, createConnection(ttyEndpoint)));
         services.put(service.getId(), service);
         LOG.info("Added service: " + service.getId());
     }
