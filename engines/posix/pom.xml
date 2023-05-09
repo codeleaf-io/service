@@ -9,42 +9,19 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>svc-engine-jetty</artifactId>
+    <artifactId>svc-engine-posix</artifactId>
 
-    <name>Service :: Engines :: Jetty</name>
-
-    <properties>
-        <jetty.version>9.4.51.v20230217</jetty.version>
-    </properties>
+    <name>Service :: Engines :: POSIX</name>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>svc-jaxrs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>svc-websocket</artifactId>
+            <artifactId>svc-posix</artifactId>
         </dependency>
         <dependency>
             <groupId>io.codeleaf.common</groupId>
             <artifactId>common-libs-logging</artifactId>
             <version>${leaf-common.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.containers</groupId>
-            <artifactId>jersey-container-servlet-core</artifactId>
-            <version>${jersey.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.inject</groupId>
-            <artifactId>jersey-hk2</artifactId>
-            <version>${jersey.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty.websocket</groupId>
-            <artifactId>javax-websocket-server-impl</artifactId>
-            <version>${jetty.version}</version>
         </dependency>
 
         <!-- test -->

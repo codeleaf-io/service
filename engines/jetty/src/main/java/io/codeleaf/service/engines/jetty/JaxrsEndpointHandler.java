@@ -18,7 +18,7 @@ public final class JaxrsEndpointHandler extends ServletEndpointHandler {
 
     public static JaxrsEndpointHandler create(JaxrsService service, ServletContextHandler handler) throws ServiceException {
         try {
-            ServletContainer servlet = new ServletContainer(ResourceConfig.forApplication(service.getApplication()));
+            ServletContainer servlet = new ServletContainer(ResourceConfig.forApplication(service.getDefinition().getApplication()));
             ServletHolder servletHolder = new ServletHolder(servlet);
             handler.addServlet(servletHolder, service.getId().getURI().getPath() + "*");
             return new JaxrsEndpointHandler(service, servlet);

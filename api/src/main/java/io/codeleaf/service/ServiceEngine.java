@@ -6,6 +6,13 @@ import java.util.List;
 
 public interface ServiceEngine extends Closeable {
 
+    enum State {
+        CREATED,
+        STOPPED,
+        STARTED,
+        DESTROYED
+    }
+
     void init() throws ServiceException;
 
     void start() throws ServiceException;
@@ -14,9 +21,15 @@ public interface ServiceEngine extends Closeable {
 
     void destroy() throws ServiceException;
 
+    State getState();
+
     ServiceOperator getServiceOperator();
 
+    List<? extends ServiceDefinition> listServiceDefinitions();
+
     List<? extends Service> listServices();
+
+    List<? extends ServiceConnection> listConnections();
 
     List<Class<? extends Service>> getSupportedServiceTypes();
 
@@ -27,7 +40,12 @@ public interface ServiceEngine extends Closeable {
     @Override
     default void close() throws IOException {
         try {
-            stop();
+            if (getState() == State.CREATED) {
+                return;
+            }
+            if (getState() == State.STARTED) {
+                stop();
+            }
             destroy();
         } catch (ServiceException cause) {
             throw new IOException("Failed to close service engine: " + cause, cause);

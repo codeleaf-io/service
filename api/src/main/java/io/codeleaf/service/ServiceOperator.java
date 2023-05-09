@@ -4,7 +4,9 @@ import io.codeleaf.common.behaviors.Identification;
 
 public interface ServiceOperator {
 
-    void deploy(Service service) throws ServiceException;
+    <S extends Service> S deploy(ServiceDefinition<S> serviceDefinition) throws ServiceException;
+
+    ServiceConnection connect(ServiceEndpoint serviceEndpoint) throws ServiceException;
 
     void retire(Identification serviceId) throws ServiceException;
 

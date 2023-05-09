@@ -1,15 +1,18 @@
 package io.codeleaf.service.engines.jaxrs;
 
+import io.codeleaf.service.Service;
 import io.codeleaf.service.ServiceEngine;
+import io.codeleaf.service.ServiceException;
 import io.codeleaf.service.engines.jetty.JettyServiceEngine;
-import io.codeleaf.service.jaxrs.DefaultJaxrsService;
 import io.codeleaf.service.jaxrs.JaxrsService;
+import io.codeleaf.service.jaxrs.JaxrsServiceConnection;
+import io.codeleaf.service.jaxrs.JaxrsServiceDefinition;
+import io.codeleaf.service.jaxrs.impl.DefaultJaxrsServiceDefinition;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Application;
 import java.io.IOException;
 import java.util.Set;
@@ -34,20 +37,23 @@ public class JaxrsTest {
     }
 
     @Test
-    public void test() throws IOException {
+    public void test() throws IOException, ServiceException {
         // Given
-        JaxrsService jaxrsService = DefaultJaxrsService.create(new MyJaxrsApplication());
+        JaxrsServiceDefinition definition = DefaultJaxrsServiceDefinition.create(new MyJaxrsApplication());
+        try (ServiceEngine engine = JettyServiceEngine.createAndStart()) {
+            JaxrsService service = engine.getServiceOperator().deploy(definition);
 
-        // When
-        try (ServiceEngine result = JettyServiceEngine.run(jaxrsService)) {
+            try (JaxrsServiceConnection connection = service.connect()) {
+                connection.open();
 
-            // Then
-            Assertions.assertEquals(1, result.listServices().size());
-            Assertions.assertTrue(result.listServices().get(0) instanceof JaxrsService);
-            JaxrsService foundService = (JaxrsService) result.listServices().get(0);
-            Assertions.assertEquals(foundService.getId().getURI(), foundService.getHttpEndpoint().toURI());
-            String response = ClientBuilder.newClient().target(foundService.getId().getURI()).path("hello").request().get(String.class);
-            Assertions.assertEquals("Hello World!", response);
+                // When
+                String result = connection.getWebTarget().path("hello").request().get(String.class);
+
+                // Then
+                Assertions.assertEquals("Hello World!", result);
+            } catch (Exception cause) {
+                Assertions.fail();
+            }
         }
     }
 

@@ -8,14 +8,14 @@
         <version>0.9.0</version>
     </parent>
 
-    <artifactId>svc-tty</artifactId>
+    <artifactId>svc-posix</artifactId>
 
-    <name>Service :: TTY</name>
+    <name>Service :: POSIX</name>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>svc-api</artifactId>
+            <artifactId>svc-tty</artifactId>
         </dependency>
     </dependencies>
 </project>

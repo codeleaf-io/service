@@ -26,10 +26,10 @@
 
     <modules>
         <module>api</module>
-        <module>tty</module>
+        <module>posix</module>
         <module>jaxrs</module>
         <module>websocket</module>
-        <module>engines/tty</module>
+        <module>engines/posix</module>
         <module>engines/jetty</module>
     </modules>
 
@@ -54,6 +54,11 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>svc-posix</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>svc-jaxrs</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -70,6 +75,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>svc-engine-tty</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>svc-engine-posix</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

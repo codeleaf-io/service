@@ -1,11 +1,17 @@
 package io.codeleaf.service.websocket;
 
 import io.codeleaf.service.Service;
+import io.codeleaf.service.ServiceException;
 import io.codeleaf.service.url.WsEndpoint;
 
 public interface WebSocketService extends Service {
 
-    Class<?> getServerEndpointClass();
+    @Override
+    WebSocketServiceDefinition getDefinition();
 
-    WsEndpoint getWsEndpoint();
+    @Override
+    WsEndpoint getEndpoint();
+
+    WebSocketServiceConnection connect() throws ServiceException;
+
 }

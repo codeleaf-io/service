@@ -19,8 +19,8 @@ public final class WsEndpointHandler extends ServletEndpointHandler {
         try {
             ServerContainer container = WebSocketServerContainerInitializer.initialize(handler);
             container.addEndpoint(ServerEndpointConfig.Builder.create(
-                    service.getServerEndpointClass(),
-                    service.getWsEndpoint().toURI().getPath()).build());
+                    service.getDefinition().getServerEndpointClass(),
+                    service.getEndpoint().toURI().getPath()).build());
             return new WsEndpointHandler(service);
         } catch (Exception cause) {
             throw new ServiceException("Failed to initialize service handler: " + cause.getMessage(), cause);
