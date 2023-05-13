@@ -1,5 +1,6 @@
 package io.codeleaf.service.websocket.impl;
 
+import io.codeleaf.service.ServiceEngine;
 import io.codeleaf.service.url.WsEndpoint;
 import io.codeleaf.service.websocket.WebSocketServiceConnection;
 import org.glassfish.tyrus.client.ClientManager;
@@ -9,26 +10,31 @@ import javax.websocket.Session;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 public class DefaultWebSocketServiceConnection implements WebSocketServiceConnection {
+
+    private volatile boolean closed;
 
     private Session session;
 
     private final UUID uuid;
+    private final ServiceEngine engine;
     private final WsEndpoint endpoint;
 
-    public static DefaultWebSocketServiceConnection create(WsEndpoint endpoint) {
-        return create(UUID.randomUUID(), endpoint);
+    public static DefaultWebSocketServiceConnection create(ServiceEngine engine, WsEndpoint endpoint) {
+        return create(UUID.randomUUID(), engine, endpoint);
     }
 
-    public static DefaultWebSocketServiceConnection create(UUID uuid, WsEndpoint endpoint) {
+    public static DefaultWebSocketServiceConnection create(UUID uuid, ServiceEngine engine, WsEndpoint endpoint) {
         Objects.requireNonNull(uuid);
         Objects.requireNonNull(endpoint);
-        return new DefaultWebSocketServiceConnection(uuid, endpoint);
+        return new DefaultWebSocketServiceConnection(uuid, engine, endpoint);
     }
 
-    public DefaultWebSocketServiceConnection(UUID uuid, WsEndpoint endpoint) {
+    public DefaultWebSocketServiceConnection(UUID uuid, ServiceEngine engine, WsEndpoint endpoint) {
         this.uuid = uuid;
+        this.engine = engine;
         this.endpoint = endpoint;
     }
 
@@ -37,8 +43,8 @@ public class DefaultWebSocketServiceConnection implements WebSocketServiceConnec
         Objects.requireNonNull(clientManager);
         Objects.requireNonNull(endpointClass);
         try {
-            clientManager.asyncConnectToServer(endpointClass, endpoint.toURI());
-        } catch (DeploymentException cause) {
+            session = clientManager.asyncConnectToServer(endpointClass, endpoint.toURI()).get();
+        } catch (DeploymentException | ExecutionException | InterruptedException cause) {
             throw new IOException("Failed to open connection: " + cause, cause);
         }
     }
@@ -54,12 +60,26 @@ public class DefaultWebSocketServiceConnection implements WebSocketServiceConnec
     }
 
     @Override
+    public ServiceEngine getEngine() {
+        return engine;
+    }
+
+    @Override
     public WsEndpoint getEndpoint() {
         return endpoint;
     }
 
     @Override
+    public boolean isClosed() {
+        return closed;
+    }
+
+    @Override
     public synchronized void close() throws IOException {
-        session.close();
+        try {
+            session.close();
+        } finally {
+            closed = true;
+        }
     }
 }

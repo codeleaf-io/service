@@ -1,5 +1,6 @@
 package io.codeleaf.service.jaxrs.impl;
 
+import io.codeleaf.service.ServiceEngine;
 import io.codeleaf.service.jaxrs.JaxrsServiceConnection;
 import io.codeleaf.service.url.HttpEndpoint;
 
@@ -11,14 +12,18 @@ import java.util.UUID;
 
 public class DefaultJaxrsServiceConnection implements JaxrsServiceConnection {
 
+    private volatile boolean closed;
+
     private Client client;
     private WebTarget webTarget;
 
     private final UUID uuid;
+    private final ServiceEngine engine;
     private final HttpEndpoint endpoint;
 
-    public DefaultJaxrsServiceConnection(UUID uuid, HttpEndpoint endpoint) {
+    public DefaultJaxrsServiceConnection(UUID uuid, ServiceEngine engine, HttpEndpoint endpoint) {
         this.uuid = uuid;
+        this.engine = engine;
         this.endpoint = endpoint;
     }
 
@@ -40,8 +45,18 @@ public class DefaultJaxrsServiceConnection implements JaxrsServiceConnection {
     }
 
     @Override
+    public ServiceEngine getEngine() {
+        return engine;
+    }
+
+    @Override
     public HttpEndpoint getEndpoint() {
         return endpoint;
+    }
+
+    @Override
+    public boolean isClosed() {
+        return closed;
     }
 
     @Override
@@ -50,6 +65,8 @@ public class DefaultJaxrsServiceConnection implements JaxrsServiceConnection {
             client.close();
         } catch (RuntimeException cause) {
             throw new IOException("Failed to close connection: " + cause, cause);
+        } finally {
+            closed = true;
         }
     }
 }

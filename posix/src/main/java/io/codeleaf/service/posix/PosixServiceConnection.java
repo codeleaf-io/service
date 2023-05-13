@@ -3,8 +3,8 @@ package io.codeleaf.service.posix;
 import io.codeleaf.service.ServiceConnection;
 import io.codeleaf.service.ServiceException;
 
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.Pipe;
 
 public interface PosixServiceConnection extends ServiceConnection {
 
@@ -12,11 +12,11 @@ public interface PosixServiceConnection extends ServiceConnection {
 
     int getExitValue();
 
-    OutputStream getStdin();
+    void doInput(ByteBuffer buffer) throws ServiceException;
 
-    InputStream getStdout();
+    Pipe.SourceChannel getStdout();
 
-    InputStream getStderr();
+    Pipe.SourceChannel getStderr();
 
     void signal(int signal) throws ServiceException;
 

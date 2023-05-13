@@ -7,6 +7,9 @@ public interface ServiceConnection extends Closeable {
 
     UUID getUUID();
 
+    ServiceEngine getEngine();
+
     ServiceEndpoint getEndpoint();
 
+    boolean isClosed();
 }

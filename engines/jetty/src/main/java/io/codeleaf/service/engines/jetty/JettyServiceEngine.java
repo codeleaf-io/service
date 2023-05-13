@@ -24,7 +24,7 @@ public final class JettyServiceEngine implements ServiceEngine {
 
     private final ServerManager serverManager;
 
-    private final Map<UUID, ServiceDefinition> definitions = new HashMap<>();
+    private final Map<UUID, ServiceDefinition<?>> definitions = new HashMap<>();
     private final Map<Identification, Service> services = new HashMap<>();
     private final Map<UUID, ServiceConnection> connections = new HashMap<>();
     private final Set<ServletEndpointHandler> handlers = new LinkedHashSet<>();
@@ -95,7 +95,7 @@ public final class JettyServiceEngine implements ServiceEngine {
     }
 
     @Override
-    public List<? extends ServiceDefinition> listServiceDefinitions() {
+    public List<? extends ServiceDefinition<?>> listServiceDefinitions() {
         return List.copyOf(definitions.values());
     }
 
@@ -179,10 +179,10 @@ public final class JettyServiceEngine implements ServiceEngine {
             }
             ServiceConnection connection;
             if (serviceEndpoint instanceof HttpEndpoint httpEndpoint) {
-                connection = new DefaultJaxrsServiceConnection(UUID.randomUUID(), httpEndpoint);
+                connection = new DefaultJaxrsServiceConnection(UUID.randomUUID(), JettyServiceEngine.this, httpEndpoint);
                 connections.put(connection.getUUID(), connection);
             } else if (serviceEndpoint instanceof WsEndpoint wsEndpoint) {
-                connection = new DefaultWebSocketServiceConnection(UUID.randomUUID(), wsEndpoint);
+                connection = new DefaultWebSocketServiceConnection(UUID.randomUUID(), JettyServiceEngine.this, wsEndpoint);
                 connections.put(connection.getUUID(), connection);
             } else {
                 throw new ServiceException("Unsupported service type: " + serviceEndpoint.getClass());

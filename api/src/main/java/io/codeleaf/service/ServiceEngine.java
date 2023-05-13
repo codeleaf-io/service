@@ -25,7 +25,7 @@ public interface ServiceEngine extends Closeable {
 
     ServiceOperator getServiceOperator();
 
-    List<? extends ServiceDefinition> listServiceDefinitions();
+    List<? extends ServiceDefinition<?>> listServiceDefinitions();
 
     List<? extends Service> listServices();
 
